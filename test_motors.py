@@ -23,34 +23,39 @@ try:
                 break
             if char == ord('S'):
                 os.system('sudo shutdown now')
-            # both motors backwards (backwards)
+            # both motors backwards (forwards)
             elif char == curses.KEY_DOWN:
-                GPIO.output(7,False)
-                GPIO.output(11,True)
-                GPIO.output(13,False)
-                GPIO.output(15,True)
-            # both motors forwards (forwards)
+                GPIO.output(7,False) # M1
+                GPIO.output(11,True) # E2
+                
+                GPIO.output(13,False) # M2
+                GPIO.output(15,True) # E2
+            # both motors forwards (backwards)
             elif char == curses.KEY_UP:
                 GPIO.output(7,True)
-                GPIO.output(11,False)
+                GPIO.output(11,True)
+
                 GPIO.output(13,True)
-                GPIO.output(15,False)
-            # right backwards, left forwards (turning left)
-            elif char == curses.KEY_LEFT:
-                GPIO.output(7,True)
-                GPIO.output(11,False)
-                GPIO.output(13,False)
                 GPIO.output(15,True)
-            # right forwards, left backwards (turning right)
-            elif char == curses.KEY_RIGHT:
+            # right forwards, left backwards (turning left)
+            elif char == curses.KEY_LEFT:
                 GPIO.output(7,False)
                 GPIO.output(11,True)
+
                 GPIO.output(13,True)
                 GPIO.output(15,False)
+            # right backwards, left forwards (turning right)
+            elif char == curses.KEY_RIGHT:
+                GPIO.output(7,True)
+                GPIO.output(11,False)
+
+                GPIO.output(13,False)
+                GPIO.output(15,True)
             # stop motors
-            elif char == ord('x')':
+            elif char == ord('x'):
                 GPIO.output(7,False)
                 GPIO.output(11,False)
+
                 GPIO.output(13,False)
                 GPIO.output(15,False)
              

@@ -62,8 +62,8 @@ try:
                 GPIO.output(7,False)
                 GPIO.output(11,False)
 
-                GPIO.output(13,False)
-                GPIO.output(15,True)
+                GPIO.output(13,True)
+                GPIO.output(15,False)
              
 finally:
     #Close down curses properly, inc turn echo back on!

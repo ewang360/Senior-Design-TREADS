@@ -26,8 +26,8 @@ try:
             # both motors backwards (forwards)
             elif char == curses.KEY_DOWN:
                 GPIO.output(7,False) # M1
-                GPIO.output(11,True) # E2
-                
+                GPIO.output(11,True) # E1
+
                 GPIO.output(13,False) # M2
                 GPIO.output(15,True) # E2
             # both motors forwards (backwards)
@@ -58,6 +58,12 @@ try:
 
                 GPIO.output(13,False)
                 GPIO.output(15,False)
+            elif char == ord('m'):
+                GPIO.output(7,False)
+                GPIO.output(11,False)
+
+                GPIO.output(13,False)
+                GPIO.output(15,True)
              
 finally:
     #Close down curses properly, inc turn echo back on!

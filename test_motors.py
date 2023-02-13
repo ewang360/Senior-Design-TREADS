@@ -4,14 +4,14 @@ import RPi.GPIO as GPIO
 
 # set GPIO numbering mode and define output pins
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(7,GPIO.OUT)      # motor A (right)   -> forwards
-GPIO.setup(11,GPIO.OUT)     # motor A (right)   -> backwards
-GPIO.setup(13,GPIO.OUT)     # motor B  (left)   -> forwards
-GPIO.setup(15,GPIO.OUT)     # motor B  (left)    -> backwards
+GPIO.setup(7,GPIO.OUT)      # motor A (right)    -> forwards    (M1)
+GPIO.setup(11,GPIO.OUT)     # motor A (left)     -> backwards   (E1)
+GPIO.setup(13,GPIO.OUT)     # motor B  (right)   -> forwards    (M2)
+GPIO.setup(15,GPIO.OUT)     # motor B  (left)    -> backwards   (E2)
 
 # Get the curses window, turn off echoing of keyboard to screen, turn on
 # instant (no waiting) key response, and use special values for cursor keys
-screen = curses.initscr()
+screen = curses.initscr() 
 curses.noecho() 
 curses.cbreak()
 screen.keypad(True)
@@ -48,7 +48,7 @@ try:
                 GPIO.output(13,True)
                 GPIO.output(15,False)
             # stop motors
-            elif char == 'x':
+            elif char == ord('x')':
                 GPIO.output(7,False)
                 GPIO.output(11,False)
                 GPIO.output(13,False)

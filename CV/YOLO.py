@@ -2,6 +2,7 @@
 import cv2
 import argparse
 import numpy as np
+import time
 
 # handle command line arguments
 ap = argparse.ArgumentParser()
@@ -15,6 +16,7 @@ ap.add_argument('-cl', '--classes', required=True,
                 help = 'path to text file containing class names')
 args = ap.parse_args()
 
+start = time.time()
 # read input image
 image = cv2.imread(args.image)
 
@@ -111,6 +113,8 @@ for i in indices:
     
     draw_bounding_box(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
 
+end = time.time()
+print(end-start)
 # display output image    
 cv2.imshow("object detection", image)
 

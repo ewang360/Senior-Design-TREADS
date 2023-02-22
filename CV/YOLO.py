@@ -122,7 +122,7 @@ cv2.imshow("object detection", image)
 cv2.waitKey()
     
  # save output image to disk
-cv2.imwrite("object-detection.jpg", image)
+cv2.imwrite("output/object-detection.jpg", image)
 
 # release resources
 cv2.destroyAllWindows()

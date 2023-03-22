@@ -8,7 +8,7 @@ print("capture on")
 
 #HOST = "192.168.0.239"  # Standard loopback interface address (localhost)
 #HOST = "192.168.0.240"  # Standard loopback interface address (localhost)
-HOST = "192.168.0.239"
+HOST = "192.168.2.3"
 PORT = 5777  # Port to listen on (non-privileged ports are > 1023)
 
 hexstring = bytearray(bytes.fromhex("F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0"))

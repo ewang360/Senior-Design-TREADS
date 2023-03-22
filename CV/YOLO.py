@@ -5,20 +5,20 @@ import numpy as np
 import time
 
 # handle command line arguments
-ap = argparse.ArgumentParser()
-ap.add_argument('-i', '--image', required=True,
-                help = 'path to input image')
-ap.add_argument('-c', '--config', required=True,
-                help = 'path to yolo config file')
-ap.add_argument('-w', '--weights', required=True,
-                help = 'path to yolo pre-trained weights')
-ap.add_argument('-cl', '--classes', required=True,
-                help = 'path to text file containing class names')
-args = ap.parse_args()
+# ap = argparse.ArgumentParser()
+# ap.add_argument('-i', '--image', required=True,
+#                 help = 'path to input image')
+# ap.add_argument('-c', '--config', required=True,
+#                 help = 'path to yolo config file')
+# ap.add_argument('-w', '--weights', required=True,
+#                 help = 'path to yolo pre-trained weights')
+# ap.add_argument('-cl', '--classes', required=True,
+#                 help = 'path to text file containing class names')
+# args = ap.parse_args()
 
 start = time.time()
 # read input image
-image = cv2.imread(args.image)
+image = cv2.imread(r"C:\Users\ewli2\Documents\Pitt\Senior\Spring\ECE1896\Senior-Design-TREADS\CV\img.jpg")
 
 Width = image.shape[1]
 Height = image.shape[0]
@@ -26,14 +26,14 @@ scale = 0.00392
 
 # read class names from text file
 classes = None
-with open(args.classes, 'r') as f:
+with open("yolov3.txt", 'r') as f:
     classes = [line.strip() for line in f.readlines()]
 
 # generate different colors for different classes 
 COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 
 # read pre-trained model and config file
-net = cv2.dnn.readNet(args.weights, args.config)
+net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
 
 # create input blob 
 blob = cv2.dnn.blobFromImage(image, scale, (416,416), (0,0,0), True, crop=False)

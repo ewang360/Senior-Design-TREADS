@@ -5,22 +5,21 @@ import asyncio
 
 async def handler(websocket):
     print("made connection!")
-    global count
+    count = 0
     while True:
-        count += 1
         if count%10 == 0:
             _, img = cap.read()
             # Convert to grayscale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Detect the bodies
             bodies = body_cascade.detectMultiScale(gray, 1.1, 4)
-            # Draw the rectangle around each body
-            for (x, y, w, h) in bodies:
-                #path = "output/img" + str(count) + ".jpg"
-                #cv2.imwrite(path, img[y:y+h,x:x+w])
-                cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
         else:
             _, img = cap.read()
+
+        count += 1
+        # Draw the rectangle around each body
+        for (x, y, w, h) in bodies:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
         imgr = cv2.cvtColor(cv2.resize(img, (200,200)),cv2.COLOR_BGR2GRAY)
         success, im_buf_arr = cv2.imencode(".jpg", imgr)
         byte_im = im_buf_arr.tobytes()

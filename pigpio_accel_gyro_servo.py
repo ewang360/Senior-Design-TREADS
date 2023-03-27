@@ -1,5 +1,8 @@
 #Include the library files
-import smbus
+import websockets
+import time
+import asyncio
+import struct
 from gpiozero import Servo
 from time import sleep
 
@@ -7,76 +10,50 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 
 factory = PiGPIOFactory()
 
-servo = Servo(21, min_pulse_width=0.4/1000, max_pulse_width=2.325/1000, pin_factory=factory)
-
-#some MPU6050 Registers and their Address
-PWR_MGMT_1   = 0x6B
-SMPLRT_DIV   = 0x19
-CONFIG       = 0x1A
-GYRO_CONFIG  = 0x1B
-INT_ENABLE   = 0x38
-ACCEL_XOUT = 0x3B
-ACCEL_YOUT = 0x3D
-ACCEL_ZOUT = 0x3F
-GYRO_XOUT  = 0x43
-GYRO_YOUT  = 0x45
-GYRO_ZOUT  = 0x47
-
-bus = smbus.SMBus(1) # or bus = smbus.SMBus(0) for older version boards
-Device_Address = 0x68 # MPU6050 device address
-
-def MPU_Init():
-    
-    #write to sample rate register
-    bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
-
-    #Write to power management register
-    bus.write_byte_data(Device_Address, PWR_MGMT_1, 1)
-
-    #Write to Configuration register
-    bus.write_byte_data(Device_Address, CONFIG, 0)
-
-    #Write to Gyro configuration register
-    bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
-
-    #Write to interrupt enable register
-    bus.write_byte_data(Device_Address, INT_ENABLE, 1)
-
-def read_raw_data(addr):
-    #Accelero and Gyro value are 16-bit
-        high = bus.read_byte_data(Device_Address, addr)
-        low = bus.read_byte_data(Device_Address, addr+1)
-    
-        #concatenate higher and lower value
-        value = ((high << 8) | low)
+async def handler(websocket):
+    servo_x = Servo(21, min_pulse_width=0.4/1000,   max_pulse_width=2.325/1000, pin_factory=factory)
+    servo_y = Servo(20, min_pulse_width=0.4/1000, max_pulse_width=2.325/1000, pin_factory=factory)
+    print("made connection!")
+    count = 0
+    while True:
+        message = await websocket.recv()
+        #print("a")
+        print(len(message))
+        floats = struct.unpack('4f', message)
+        print("floats: ", floats)
         
-        #to get signed value from mpu6050
-        if(value > 32768):
-                value = value - 65536
-        return value
+        #Moving head right
+        if(floats[1] <= 360.0 and floats[1] >= 270.0):
+            value_x = ((floats[1]-360) / (270-360)*-1) * (1-0) + 0
 
-MPU_Init()
-
-while True:
-    #Read Accelerometer raw value
-    acc_x = read_raw_data(ACCEL_XOUT)
-    acc_y = read_raw_data(ACCEL_YOUT)
-    acc_z = read_raw_data(ACCEL_ZOUT)
-
-    #Read Gyroscope raw value
-    gyro_x = read_raw_data(GYRO_XOUT)
-    gyro_y = read_raw_data(GYRO_YOUT)
-    gyro_z = read_raw_data(GYRO_ZOUT)
-
-    Ax = acc_x/16384.0
-    Ay = acc_y/16384.0 
-    Az = acc_z/16384.0
-
-    Gx = gyro_x/131.0
-    Gy = gyro_y/131.0
-    Gz = gyro_z/131.0
-    
-    if Ay >= -1 and Ay <= 1:
+        #Moving head left
+        if(floats[1] >= 0 and floats[1] <= 90):
+            value_x = ((floats[1]-0) / (90-0)) * (0-(-1)) + (-1)
         
-        servo.value = (round(Ay,4)*-1)
+        #Moving head up
+        if(floats[0] <= 360 and floats[0] >= 270):
+            value_y = ((floats[0]-360) / (270-360)*-1) * (1-0) + 0
+
+        #Moving head down
+        if(floats[0] >= 0 and floats[0] <= 90):
+            value_y = ((floats[0]-0) / (90-0)) * (0-(-1)) + (-1)
+            
+        #marks change
+        value_x = floats[0]
+        if value_x > 180:
+            value_x -= 360
+        value_x /= -90
+            
+        print("x",value_x)
+        print("y",value_y)
+        servo_x.value = value_x
+        servo_y.value = value_y
         sleep(0.005)
+
+async def main():
+    async with websockets.serve(handler, "", PORT):
+        await asyncio.Future()
+
+PORT = 5777
+
+asyncio.run(main())

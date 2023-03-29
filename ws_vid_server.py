@@ -3,7 +3,7 @@ import cv2
 import time
 import asyncio
 
-async def handler(websocket):
+async def vid_handler(websocket):
     print("made connection!")
     count = 0
     while True:
@@ -20,18 +20,26 @@ async def handler(websocket):
         # Draw the rectangle around each body
         for (x, y, w, h) in bodies:
             cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        imgr = cv2.cvtColor(cv2.resize(img, (200,200)),cv2.COLOR_BGR2GRAY)
+            p_img = img[y:y+h,x:x+w]
+        imgr = cv2.resize(img, (800,800))
         success, im_buf_arr = cv2.imencode(".jpg", imgr)
         byte_im = im_buf_arr.tobytes()
         print("send image, size: ", len(byte_im))
         await websocket.send(byte_im)
+        
+        # encode and send person image to app
+        success, im_buf_arr = cv2.imencode(".jpg", p_img)
+        byte_im = im_buf_arr.tobytes()
+        print("send image, size: ", len(byte_im))
+        await websocket.send(byte_im)
+        
 
 async def main():
-    async with websockets.serve(handler, "", PORT):
+    async with websockets.serve(vid_handler, "", PORT):
         await asyncio.Future()
 
 
-PORT = 5777
+PORT = 5787
 
 #cv init
 body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')

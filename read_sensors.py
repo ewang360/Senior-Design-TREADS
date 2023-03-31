@@ -20,12 +20,13 @@ async def handler(websocket):
             
         Traw = ((data[3] & 0xf) << 16) + (data[4] << 8) + data[5]
         temperature = (200*float(Traw)/2**20 - 50)*(9/5)+ 32
-     
+        temp=round(temperature,2)
             
         Hraw = ((data[3] & 0xf0) >> 4) + (data[1] << 12) + (data[2] << 4)
         humidity = 100*float(Hraw)/2**20
+        hum=round(humidity,2)
     
-        await websocket.send(str(temperature)+"+"+str(humidity))
+        await websocket.send(str(temp)+"+"+str(hum))
         
 async def main():
     async with websockets.serve(handler, "", PORT):

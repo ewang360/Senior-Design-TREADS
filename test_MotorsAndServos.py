@@ -3,14 +3,54 @@ import time
 import asyncio
 import struct
 import RPi.GPIO as GPIO
+from gpiozero import Servo
+from time import sleep
+
+from gpiozero.pins.pigpio import PiGPIOFactory
+
+factory = PiGPIOFactory()
 
 async def handler(websocket):
     print("made connection!")
-    count = 0
+    
+    servo_x = Servo(20, min_pulse_width=0.4/1000,   max_pulse_width=2.325/1000, pin_factory=factory)
+    servo_y = Servo(21, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000, pin_factory=factory)
+    servo_y.value = -0.25
+    
     while True:
         message = await websocket.recv()
         print(len(message))
         floats = struct.unpack('4f', message) 
+        print("floats: ", floats)
+        
+        ### Servos Controls ###
+        value_x = floats[0]
+        if value_x > 180:
+            value_x -= 360
+        value_x /= -90
+        if value_x > 0.5:
+            value_x = 0.5
+        if value_x < -0.3:
+            value_x = -0.3
+            
+        value_y = floats[1]
+        if value_y > 180:
+            value_y -= 360
+        value_y /= -90
+        if value_y > 1:
+            value_y = 1
+        if value_y < -1:
+            value_y = -1
+            
+        print("x",value_x)
+        print("y",value_y)
+        servo_x.value = value_x-.5
+        servo_y.value = value_y
+        sleep(0.005)
+        
+        
+            ######Motor Controls ##########
+            
         # both motors backwards (forwards)
         if (floats[2]>=-0.25 and floats[2]<=0.25) and (floats[3]>=0.75):
             GPIO.output(7,False) # M1
@@ -61,8 +101,7 @@ GPIO.setup(11,GPIO.OUT)     # motor A (left)     -> backwards   (E1)
 GPIO.setup(13,GPIO.OUT)     # motor B  (right)   -> forwards    (M2)
 GPIO.setup(15,GPIO.OUT)     # motor B  (left)    -> backwards   (E2)
 
-print("hi")
 asyncio.run(main())
-print("there")
+
     
 

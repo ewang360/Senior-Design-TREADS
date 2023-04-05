@@ -63,7 +63,8 @@ def cv():
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # Detect the bodies
             rectangles, weights = hog.detectMultiScale(gray, padding=(4, 4), scale=1.02)
-
+            print(len(rectangles),len(weights))
+            
 def handler():
     global grabbed
     global frame
@@ -83,6 +84,7 @@ def handler():
                 if conf[i] > 0.7:
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     cv2.putText(frame, str(round(conf[i],2)), (x-5, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                        
         #img = cv2.resize(frame, (200,200))
         if frame is not None:
             cv2.putText(frame, "{:.0f} iterations/sec".format(cps.countsPerSec()), (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))

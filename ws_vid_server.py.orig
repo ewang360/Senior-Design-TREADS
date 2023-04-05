@@ -1,18 +1,30 @@
 import cv2
+import time
+import asyncio
 from threading import Thread
-from cps import CountsPerSec
+import websockets
 
 # declare global variables
-#body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
+<<<<<<< HEAD
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+=======
+body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d
 stream = cv2.VideoCapture(0)
+count = 0
+frames = 0
+start = time.time()
 
 # cv
 cv_stopped = False
+PORT = 5787
 frame = None
 rectangles = None
+<<<<<<< HEAD
 weights = None
+=======
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d
 
 # getter
 getter_stopped = False
@@ -48,23 +60,32 @@ def get():
             getter_stop()
         else:
             (grabbed, frame) = stream.read()
-            # print(grabbed)
 
 def cv():
     global rectangles
     global grabbed
     global frame
+<<<<<<< HEAD
     global weights
+=======
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d
+    
+    print("starting")
+    (grabbed, frame) = stream.read()
 
-    while not cv_stopped:
-        if grabbed and frame is not None:
+    while True:
+        if grabbed:
             # Computer Vision Section
             # Convert to grayscale
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # Detect the bodies
+<<<<<<< HEAD
             rectangles, weights = hog.detectMultiScale(gray, padding=(4, 4), scale=1.02)
-
-def handler():
+=======
+            rectangles = body_cascade.detectMultiScale(gray, 1.1, 4)
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d
+            
+async def handler(websocket):
     global grabbed
     global frame
     global stream
@@ -72,9 +93,8 @@ def handler():
     global cv_stopped
     global rectangles
 
-    cps = CountsPerSec().start()
-
     while not cv_stopped:
+<<<<<<< HEAD
         # Draw rectangles around detected bodies
         conf = weights
         rects = rectangles
@@ -83,20 +103,38 @@ def handler():
                 if conf[i] > 0.7:
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     cv2.putText(frame, str(round(conf[i],2)), (x-5, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    
+        # transmit image
         #img = cv2.resize(frame, (200,200))
-        if frame is not None:
-            cv2.putText(frame, "{:.0f} iterations/sec".format(cps.countsPerSec()), (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
-            cv2.imshow("img",frame)
-            cps.increment()
+        success, im_buf_arr = cv2.imencode(".jpg", frame)
+        byte_im = im_buf_arr.tobytes()
+        await websocket.send(byte_im)
+        
+=======
+        # Draw the rectangle around each body
+        for (x, y, w, h) in rectangles:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        #img = cv2.resize(frame, (200,200))
+        img = frame
+        success, im_buf_arr = cv2.imencode(".jpg", img)
+        byte_im = im_buf_arr.tobytes()
+        await websocket.send(byte_im)
         if cv2.waitKey(1) == ord("q"):
-            cv_stop()
-            getter_stop()
+            cv_stopped = True
+
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d
+async def main():
+    async with websockets.serve(handler, "", PORT):
+        await asyncio.Future()
 
 getter_start()
 cv_start()
-
-handler()
+asyncio.run(main())
 
 stream.release()
 get_thread.join()
+<<<<<<< HEAD
 cv_thread.join()
+=======
+cv_thread.join()
+>>>>>>> 6a2eb0b11986a746abc6eac0ba804f4831d3c00d

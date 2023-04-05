@@ -94,7 +94,6 @@ async def handler(websocket):
         success, im_buf_arr = cv2.imencode(".jpg", frame)
         byte_im = im_buf_arr.tobytes()
         await websocket.send(byte_im)
-        
 async def main():
     async with websockets.serve(handler, "", PORT):
         await asyncio.Future()

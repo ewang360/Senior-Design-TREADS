@@ -68,6 +68,7 @@ def cv():
             # Computer Vision Section
             # Convert to grayscale
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray = cv2.rotate(gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
             # Detect the bodies
             rectangles, weights = hog.detectMultiScale(gray, padding=(4, 4), scale=1.02)
             
@@ -86,14 +87,19 @@ async def handler(websocket):
         if rects is not None:
             for i, (x, y, w, h) in enumerate(rects):
                 if conf[i] > 0.7:
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                    cv2.putText(frame, str(round(conf[i],2)), (x-5, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    img = frame
+                    img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                    cv2.putText(img, str(round(conf[i],2)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+                    frame = img
                     
         # transmit image
-        #img = cv2.resize(frame, (200,200))
+        img = cv2.resize(frame, (200,200))
         success, im_buf_arr = cv2.imencode(".jpg", frame)
         byte_im = im_buf_arr.tobytes()
         await websocket.send(byte_im)
+        time.sleep(0.05)
 async def main():
     async with websockets.serve(handler, "", PORT):
         await asyncio.Future()

@@ -1,6 +1,7 @@
 import cv2
 from threading import Thread
 from cps import CountsPerSec
+import math
 
 # declare global variables
 hog = cv2.HOGDescriptor()
@@ -76,16 +77,17 @@ def handler():
 
     while not cv_stopped:
         # Draw rectangles around detected bodies
-        conf = weights
+        c = weights
         rects = rectangles
         if rects is not None:
             for i, (x, y, w, h) in enumerate(rects):
-                if conf[i] > 0.7:
+                conf = 1/(1+math.exp(-2*c[i]))
+                if c[i] > 0.85:
                     #cv2.rectangle(frame, (frame.shape[1]-y, x), (frame.shape[1]-y-h, x+w), (0, 255, 0), 2)
                     img = frame
                     img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                    cv2.putText(img, str(round(conf[i],2)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    cv2.putText(img, str(round(conf*100,2))+"%", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                     img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
                     frame = img
         #img = cv2.resize(frame, (200,200))

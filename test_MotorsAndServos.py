@@ -19,9 +19,9 @@ async def handler(websocket):
     
     while True:
         message = await websocket.recv()
-        print(len(message))
+        #print(len(message))
         floats = struct.unpack('4f', message) 
-        print("floats: ", floats)
+        #print("floats: ", floats)
         
         ### Servos Controls ###
         value_x = floats[0]
@@ -42,8 +42,8 @@ async def handler(websocket):
         if value_y < -1:
             value_y = -1
             
-        print("x",value_x)
-        print("y",value_y)
+        #print("x",value_x)
+        #print("y",value_y)
         servo_x.value = value_x-.5
         servo_y.value = value_y
         sleep(0.005)

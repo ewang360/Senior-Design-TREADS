@@ -3,6 +3,7 @@ import time
 import asyncio
 from threading import Thread
 import websockets
+import RPi.GPIO as GPIO
 
 # declare global variables
 hog = cv2.HOGDescriptor()
@@ -11,7 +12,7 @@ stream = cv2.VideoCapture(0)
 
 # cv
 cv_stopped = False
-PORT = 5787
+PORT = 5788
 frame = None
 rectangles = None
 weights = None
@@ -81,6 +82,7 @@ async def handler(websocket):
         # Draw rectangles around detected bodies
         conf = weights
         rects = rectangles
+        found = False
         if rects is not None:
             for i, (x, y, w, h) in enumerate(rects):
                 if conf[i] > 0.7:
@@ -90,6 +92,9 @@ async def handler(websocket):
                     cv2.putText(img, str(round(conf[i],2)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                     img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
                     frame = img
+                    found = True
+                    
+        GPIO.output(29,found)
                     
         # transmit image
         img = cv2.resize(frame, (200,200))
@@ -101,6 +106,9 @@ async def handler(websocket):
 async def main():
     async with websockets.serve(handler, "", PORT):
         await asyncio.Future()
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(29,GPIO.OUT)
 
 getter_start()
 cv_start()

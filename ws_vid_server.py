@@ -8,9 +8,6 @@ import websockets
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 stream = cv2.VideoCapture(0)
-count = 0
-frames = 0
-start = time.time()
 
 # cv
 cv_stopped = False
@@ -100,6 +97,7 @@ async def handler(websocket):
         byte_im = im_buf_arr.tobytes()
         await websocket.send(byte_im)
         time.sleep(0.05)
+        
 async def main():
     async with websockets.serve(handler, "", PORT):
         await asyncio.Future()
